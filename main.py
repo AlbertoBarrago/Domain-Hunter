@@ -31,6 +31,8 @@ from datetime import datetime
 import logging
 import ipaddress
 
+from exceptions.error_handling import WhoisError, DomainResolutionError, ValidationError, FetchError
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -43,16 +45,29 @@ def get_domain(ip):
 
     Returns:
         str or list: Domain name(s) associated with the IP(s)
-        None: If resolution fails
+
+    Raises:
+        ValidationError: If an IP format is invalid
+        DomainResolutionError: If domain resolution fails
     """
+    if not ip:
+        raise ValidationError("IP address cannot be empty")
+
     try:
         if '/' in ip:
             network = ipaddress.ip_network(ip)
             return [str(ip) for ip in network.hosts()]
-        return socket.gethostbyaddr(ip)[0]
-    except Exception as e:
-        logging.error("Failed to resolve domain for IP %s: {%s}", ip, str(e))
-        return None
+
+        domain = socket.gethostbyaddr(ip)[0]
+        return domain
+
+    except ValueError as e:
+        logging.error("Invalid IP format: %s", ip)
+        raise ValidationError(f"Invalid IP format: {ip}") from e
+
+    except socket.herror as e:
+        logging.error("Domain resolution failed for IP %s: %s", ip, str(e))
+        raise DomainResolutionError(f"Could not resolve domain for IP: {ip}") from e
 
 
 def get_domain_info(domain):
@@ -71,7 +86,7 @@ def get_domain_info(domain):
         if isinstance(w.expiration_date, list):
             return w.expiration_date[0]
         return w.expiration_date
-    except Exception as e:
+    except WhoisError as e:
         logging.error("Failed to get WHOIS info for domain %s: %s", domain, str(e))
         return None
 
@@ -95,7 +110,7 @@ def get_domain_price(domain):
             return response.text
         logging.error("API call failed for domain %s: %s}", domain, response.text)
         return None
-    except Exception as e:
+    except DomainResolutionError as e:
         logging.error("Failed to get price for domain %s: $%s", domain, e)
         return None
 
@@ -147,10 +162,7 @@ def fetch_target_ips():
         list: List of unique IP addresses
     """
     sources = [
-        "https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/datacenters.ipset",
-        "https://www.spamhaus.org/drop/drop.txt",
-        "https://raw.githubusercontent.com/X4BNet/lists_vpn/main/output/datacenter/ipv4.txt",
-        "https://raw.githubusercontent.com/X4BNet/lists_vpn/main/output/vpn/ipv4.txt"
+       "52.250.42.157"
     ]
     ip_list = set()
 
@@ -161,7 +173,7 @@ def fetch_target_ips():
                 if line and not line.startswith('#'):
                     ip = line.split()[0]
                     ip_list.add(ip)
-        except Exception as e:
+        except FetchError as e:
             logging.error("Failed to fetch IPs from %s: %s", source, str(e))
 
     return list(ip_list)
