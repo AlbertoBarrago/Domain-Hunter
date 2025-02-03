@@ -27,10 +27,9 @@ Version: 1.0
 import socket
 import whois
 import requests
-from datetime import datetime
 import logging
 import ipaddress
-
+from datetime import datetime
 from exceptions.error_handling import WhoisError, DomainResolutionError, ValidationError, FetchError
 
 logging.basicConfig(level=logging.INFO)
@@ -51,7 +50,7 @@ def get_domain(ip):
         DomainResolutionError: If domain resolution fails
     """
     if not ip:
-        raise ValidationError("IP address cannot be empty")
+        raise ValidationError(message="IP address cannot be empty", error_code="INVALID_IP")
 
     try:
         if '/' in ip:
@@ -63,11 +62,12 @@ def get_domain(ip):
 
     except ValueError as e:
         logging.error("Invalid IP format: %s", ip)
-        raise ValidationError(f"Invalid IP format: {ip}") from e
+        raise ValidationError(message=f"Invalid IP format: {ip}", error_code="INVALID_IP") from e
 
     except socket.herror as e:
         logging.error("Domain resolution failed for IP %s: %s", ip, str(e))
-        raise DomainResolutionError(f"Could not resolve domain for IP: {ip}") from e
+        raise DomainResolutionError(message=f"Could not resolve domain for IP: {ip}",
+                                    error_code="IP_FAILED_RESOLUTION") from e
 
 
 def get_domain_info(domain):
@@ -162,7 +162,7 @@ def fetch_target_ips():
         list: List of unique IP addresses
     """
     sources = [
-       "52.250.42.157"
+        "52.250.42.157"
     ]
     ip_list = set()
 
