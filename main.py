@@ -20,7 +20,7 @@ Requirements:
     - logging
     - ipaddress
 
-Author: Unknown
+Author: alBz (https://codeberg.org/alBz)
 Version: 1.0
 """
 
