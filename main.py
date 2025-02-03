@@ -25,11 +25,14 @@ Version: 1.0
 """
 
 import socket
-import whois
-import requests
+
 import logging
 import ipaddress
 from datetime import datetime
+
+import whois
+import requests
+
 from exceptions.error_handling import WhoisError, DomainResolutionError, ValidationError, FetchError
 
 logging.basicConfig(level=logging.INFO)

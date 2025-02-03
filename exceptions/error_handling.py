@@ -25,6 +25,21 @@ class DomainResolutionError(DomainAnalysisError):
 
 class WhoisError(DomainAnalysisError):
     """Raised when WHOIS queries fail"""
+    def __init__(self, message, error_code):
+        super().__init__(message, error_code)
+        self.whois_server = None
+
+    def set_whois_server(self, server):
+        """Set the WHOIS server for the error"""
+        self.whois_server = server
+
+    def get_error_details(self):
+        """Get error details"""
+        return {
+            'message': self.message,
+            'code': self.error,
+            'whois_server': self.whois_server
+        }
 
 
 class APIError(DomainAnalysisError):
