@@ -3,9 +3,9 @@ charset-normalizer==3.4.1
 idna==3.10
 python-dateutil==2.9.0.post0
 python-whois==0.9.5
-requests==2.32.3
+requests==2.32.4
 six==1.17.0
-urllib3==2.3.0
+urllib3==2.5.0
 whois==1.20240129.2
 
 tqdm~=4.67.1
