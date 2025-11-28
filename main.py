@@ -5,8 +5,8 @@ This script analyzes domain names associated with IP addresses from various bloc
 and data center IP ranges. It checks for expired domains and their prices, generating
 a comprehensive analysis report.
 
-Author: alBz (https://codeberg.org/alBz)
-Version: 1.0 (Fixed and Consolidated)
+Author: alBz <albertobarrago@gmail.com>
+Version: 0.0.1
 """
 import os
 import re
